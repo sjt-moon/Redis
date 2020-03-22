@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\data_structure">
-      <UniqueIdentifier>{3f8dbd08-5648-4917-926b-1fba0b9571a0}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,24 +21,12 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="util\data_structure\skiplist.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="util\view\view.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Redis.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="util\data_structure\skiplist.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="util\view\view.cpp">
+    <ClCompile Include="data_structure_test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
