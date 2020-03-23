@@ -33,11 +33,12 @@ namespace test
 		TEST_METHOD(Insertion)
 		{
 			Skiplist<std::string> *skiplist = get_string_skiplist();
-			std::string expected_visualization_str = 
+			std::string expected_visualization_str =
 				"|    L3    |---2--->|  coffee  |-->   NULL   \n"
 				"|    L2    |---2--->|  coffee  |----4---->|   next   |-->   NULL   \n"
 				"|    L1    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |---3---->|   next   |-->   NULL   \n"
-				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   good   |--1--->|   lol    |--1--->|   next   |-->   NULL   \n";
+				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   good   |--1--->|   lol    |--1--->|   next   |-->   NULL   \n"
+				"|   BACK   |<--b---|   bar    |<--b---|  coffee  |<--b---|fantastic |<--b---|   good   |<--b---|   lol    |<--b---|   next   |\n";
 			Assert::AreEqual(expected_visualization_str, skiplist->visualize_str());
 		}
 
@@ -48,7 +49,8 @@ namespace test
 				"|    L3    |---2--->|  coffee  |-->   NULL   \n"
 				"|    L2    |---2--->|  coffee  |----4---->|   next   |-->   NULL   \n"
 				"|    L1    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |---3---->|   next   |-->   NULL   \n"
-				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   good   |--1--->|   lol    |--1--->|   next   |-->   NULL   \n";
+				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   good   |--1--->|   lol    |--1--->|   next   |-->   NULL   \n"
+				"|   BACK   |<--b---|   bar    |<--b---|  coffee  |<--b---|fantastic |<--b---|   good   |<--b---|   lol    |<--b---|   next   |\n";
 			Assert::AreEqual(original_visualization_str, skiplist->visualize_str());
 
 			std::string s = "bad";
@@ -60,7 +62,8 @@ namespace test
 				"|    L3    |---2--->|  coffee  |-->   NULL   \n"
 				"|    L2    |---2--->|  coffee  |---3---->|   next   |-->   NULL   \n"
 				"|    L1    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |---2--->|   next   |-->   NULL   \n"
-				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   lol    |--1--->|   next   |-->   NULL   \n";
+				"|    L0    |--1--->|   bar    |--1--->|  coffee  |--1--->|fantastic |--1--->|   lol    |--1--->|   next   |-->   NULL   \n"
+				"|   BACK   |<--b---|   bar    |<--b---|  coffee  |<--b---|fantastic |<--b---|   lol    |<--b---|   next   |\n";
 			Assert::AreEqual(expected_visualization_str, skiplist->visualize_str());
 		}
 	};

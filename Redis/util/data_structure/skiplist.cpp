@@ -22,7 +22,25 @@ SkiplistNode<T>* SkiplistNode<T>::Create(int level, std::unique_ptr<T> obj)
 		skiplist_level.span = 0;
 		node->levels.push_back(skiplist_level);
 	}
+	node->backward = NULL;
 	return node;
+}
+
+template<class T>
+void SkiplistNode<T>::remove(SkiplistNode<T>* node)
+{
+	if (node) {
+		// Delete a deleted obj is undefined behaviour. When removing a node,
+		// its forward ptrs and backward may already be deleted. It's Skiplist level
+		// method responsibility to choose the order of removal and record the
+		// next node to be removed. Thus, making forward and backward ptrs as
+		// nullptr to avoid double-removal.
+		for (auto skiplist_level : node->levels) {
+			skiplist_level.forward = nullptr;
+		}
+		node->backward = nullptr;
+		delete node;
+	}
 }
 
 template<class T>
@@ -94,8 +112,8 @@ SkiplistNode<T>* Skiplist<T>::insert(std::unique_ptr<T> obj)
 	}
 
 	inserted_node->backward = update[0];
-	if (update[0]->levels[0].forward) {
-		update[0]->levels[0].forward->backward = inserted_node;
+	if (inserted_node->levels[0].forward) {
+		(inserted_node->levels[0].forward)->backward = inserted_node;
 	}
 	else {
 		this->tail = inserted_node;
@@ -106,7 +124,7 @@ SkiplistNode<T>* Skiplist<T>::insert(std::unique_ptr<T> obj)
 }
 
 template<class T>
-bool Skiplist<T>::remove(T *obj) {
+SkiplistNode<T> *Skiplist<T>::find(T *obj) {
 	SkiplistNode<T> *update[MAX_LEVEL];
 	int spans[MAX_LEVEL];
 	for (int i = 0; i < MAX_LEVEL; ++i) {
@@ -124,26 +142,26 @@ bool Skiplist<T>::remove(T *obj) {
 		update[i] = p;
 	}
 
-	// If obj does not exist, return false.
+	// If obj does not exist, return nullptr.
 	if (!p->levels[0].forward || this->compare(p->levels[0].forward->obj.get(), obj) != 0) {
-		return false;
+		return nullptr;
 	}
 
-	// update[i] maynot be the predecessor to removed_node at level i, so removed_node may don't have levels i.
-	SkiplistNode<T> *removed_node = p->levels[0].forward;
+	// update[i] maynot be the predecessor to found_node at level i, so found_node may don't have levels i.
+	SkiplistNode<T> *found_node = p->levels[0].forward;
 	for (int i = this->level - 1; i >= 0; --i) {
-		// If removed_node appears in this level, merge intervals.
-		if (i < (int)removed_node->levels.size()) {
-			update[i]->levels[i].forward = removed_node->levels[i].forward;
-			update[i]->levels[i].span += removed_node->levels[i].span - 1;
+		// If found_node appears in this level, merge intervals.
+		if (i < (int)found_node->levels.size()) {
+			update[i]->levels[i].forward = found_node->levels[i].forward;
+			update[i]->levels[i].span += found_node->levels[i].span - 1;
 		}
-		// Else if removed_node is included in this invertal at this level, but does not exist in this level, decrease level span.
+		// Else if found_node is included in this invertal at this level, but does not exist in this level, decrease level span.
 		else if (update[i]->levels[i].forward) {
 			update[i]->levels[i].span--;
 		}
 	}
-	if (removed_node->levels[0].forward) {
-		removed_node->levels[0].forward->backward = update[0];
+	if (found_node->levels[0].forward) {
+		found_node->levels[0].forward->backward = update[0];
 	}
 	else {
 		this->tail = update[0];
@@ -154,6 +172,31 @@ bool Skiplist<T>::remove(T *obj) {
 			this->level = i + 1;
 			break;
 		}
+	}
+	return found_node;
+}
+
+template<class T>
+bool Skiplist<T>::remove(T * obj)
+{
+	SkiplistNode<T> *p = this->find(obj);
+	if (p) {
+		SkiplistNode<T>::remove(p);
+		return true;
+	}
+	return false;
+}
+
+template<class T>
+bool Skiplist<T>::remove()
+{
+	SkiplistNode<T> *p = this->tail;
+	// head is removed via the 1st node.backward ptr, tail is removed as well. After while-loop,
+	// both head and tail allocated memory are removed.
+	while (p) {
+		SkiplistNode<T> *prev = p->backward;
+		SkiplistNode<T>::remove(p);
+		p = prev;
 	}
 	return true;
 }
@@ -174,10 +217,11 @@ template<class T>
 std::string Skiplist<T>::visualize_str(int block_width, int span_num_width)
 {
 	std::string visualization_output = "";
+	SkiplistNode<T> *p = this->head;
 	for (int i = MAX_LEVEL - 1; i >= 0; --i) {
 		// head
 		visualization_output += view::centered_str(block_width, "L" + std::to_string(i), ' ', "|");
-		SkiplistNode<T> *p = this->head;
+		p = this->head;
 		while (i < (int)p->levels.size() && p->levels[i].forward) {
 			visualization_output += view::centered_str(p->levels[i].span + span_num_width, std::to_string(p->levels[i].span), '-') + ">";
 			visualization_output += view::centered_str(block_width, this->to_string(p->levels[i].forward->obj.get()), ' ', "|");
@@ -185,7 +229,15 @@ std::string Skiplist<T>::visualize_str(int block_width, int span_num_width)
 		}
 		visualization_output += "-->" + view::centered_str(block_width, "NULL") + "\n";
 	}
-	return visualization_output;
+	// tail backward
+	std::string backward_str = "\n";
+	p = this->tail;
+	while (p && p != this->head) {
+		backward_str = "<--b---" + view::centered_str(block_width, this->to_string(p->obj.get()), ' ', "|") + backward_str;
+		p = p->backward;
+	}
+	backward_str = view::centered_str(block_width, "BACK", ' ', "|") + backward_str;
+	return visualization_output + backward_str;
 }
 
 template<class T>

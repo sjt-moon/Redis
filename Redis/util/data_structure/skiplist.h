@@ -21,6 +21,7 @@ public:
 
 	SkiplistNode(std::unique_ptr<T> obj);
 	static SkiplistNode<T> *Create(int level, std::unique_ptr<T> obj);
+	static void remove(SkiplistNode<T> *node);
 };
 
 template <class T>
@@ -38,7 +39,12 @@ public:
 
 	SkiplistNode<T> *insert(std::unique_ptr<T> obj);
 
+	// Remove an obj.
+	SkiplistNode<T> *find(T* obj);
 	bool remove(T* obj);
+
+	// Remove skiplist.
+	bool remove();
 
 	void visualize();
 	std::string visualize_str();
